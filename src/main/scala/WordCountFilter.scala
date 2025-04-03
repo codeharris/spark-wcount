@@ -34,19 +34,19 @@ object WordCountFilter {
       val textFile = sc.textFile(inputPath) // Read lines from WordCount output
 
       val filteredCounts = textFile.flatMap { line =>
-          // Process each line: Split, Validate, Parse, Filter bad lines
-          val parts = line.toLowerCase.split("\t") // EXPECTING TAB SEPARATOR from standard Hadoop WordCount output
+          val cleaned = line.replaceAll("[()]", "") // Remove parentheses
+          val parts = cleaned.split(",", 2)         // Limit to 2 parts
           if (parts.length == 2) {
-            val word = parts(0)
-            val countStr = parts(1)
+            val word = parts(0).trim.toLowerCase
+            val countStr = parts(1).trim
             if (WORD_PATTERN.matcher(word).matches()) {
               Try(countStr.toInt).toOption.map(count => (word, count))
             } else None
           } else None
-        } // Result: RDD[(String, Int)] containing only valid word-count pairs
-        .filter { case (_, count) => count == 1000 } // Apply the count filter
-        .map { case (word, count) => s"$word\t$count" } // Format back to "word<tab>count"
-        .coalesce(1) // Optional: combine to one output file
+        }
+        .filter { case (_, count) => count == 1000 }
+        .map { case (word, count) => s"$word\t$count" }
+        .coalesce(1)
 
       // 5. Save Results
       filteredCounts.saveAsTextFile(outputPath)
