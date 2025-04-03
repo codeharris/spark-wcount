@@ -16,7 +16,7 @@ object WordPairsFilter {
 
     val filteredPairs = sc.textFile(args(0))
       .flatMap { line =>
-        val parts = line.trim.split("\t")
+        val parts = line.trim.split(" ") // space-delimited
         if (parts.length == 2) {
           try {
             val count = parts(1).toInt
