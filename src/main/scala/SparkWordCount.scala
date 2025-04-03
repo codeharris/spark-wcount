@@ -27,7 +27,7 @@ object SparkWordCount {
       .map(word => (word, 1))
       .reduceByKey(_ + _)
       .coalesce(1)
-    counts.saveAsTextFile(args(1))
+      counts.saveAsTextFile(args(1))
 
     sc.stop()
   }
